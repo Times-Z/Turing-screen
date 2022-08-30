@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+
+import os
 import threading
 from time import time
 from tracemalloc import Frame
@@ -129,21 +131,30 @@ if __name__ == "__main__":
             },
         }
 
+        if config.get("show_fps"):
+            text_information['fps'] = {
+                "text": "FPS : " + str(round(1.0 / (time() - start_time), 1)),
+                "x": 265,
+                "y": 465,
+                "background_image": theme,
+                "font_size": 12,
+                "font_color": (98, 114, 164)
+            }
         for name in text_information:
             threads.append(generateThread(
                 display.DisplayText, text_information.get(name)))
 
-        # for picture in sorted(os.listdir(config.get("assets_dir") + "imgs/heart")):
-        #     threads.append(generateThread(
-        #         display.DisplayBitmap, {
-        #         "bitmap_path": config.get("assets_dir") + "imgs/heart/" + picture,
-        #         "x": 100,
-        #         "y": 300,
-        #     }))
+        # for picture in sorted(os.listdir(config.get("assets_dir") + "imgs/surf")):
+            # threads.append(generateThread(
+            #     display.DisplayBitmap, {
+            #         "bitmap_path": config.get("assets_dir") + "imgs/surf/" + picture,
+            #         "x": 100,
+            #         "y": 300,
+            #     }))
 
         # threads.append(generateThread(
         #     display.DisplayBitmap, {
-        #     "bitmap_path": config.get("assets_dir") + "imgs/heart.gif",
+        #     "bitmap_path": config.get("assets_dir") + "imgs/surf.gif",
         #     "x": 100,
         #     "y": 300,
         # }))
@@ -155,7 +166,8 @@ if __name__ == "__main__":
             thread.join()
             if serial_com.isOpen():
                 serial_com.close()
-        print("FPS: ", 1.0 / (time() - start_time), end="\r", flush=True, )
+        print("FPS: ", round(1.0 / (time() - start_time), 1),
+              end="\r", flush=True, )
 
     if not serial_com.isOpen():
         serial_com.open()

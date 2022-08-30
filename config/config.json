@@ -6,7 +6,8 @@
     "theme": "dark",
     "refresh_interval": 1,
     "display_width": 320,
-    "display_height": 420,
+    "display_height": 480,
     "network_interface": "enp34s0",
-    "cpu_temp_device_name": "k10temp"
+    "cpu_temp_device_name": "k10temp",
+    "show_fps": true
 }
