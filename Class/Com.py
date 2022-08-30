@@ -14,11 +14,17 @@ class Com:
     SCREEN_ON = 109
     SET_BRIGHTNESS = 110
     DISPLAY_BITMAP = 197
+    BRIGHTNESS_LEVEL = {
+        "high": 0,
+        "medium": 128,
+        "low": 255
+    }
 
-    def __init__(self, serial: serial):
+    def __init__(self, serial: serial, config: dict):
         self.serial = serial
-        self.Clear()
-        self.SetBrightness(0)
+        self.ScreenOn()
+        self.SetBrightness(self.BRIGHTNESS_LEVEL.get(
+            config.get("screen_brightness")))
 
     def SendReg(self, cmd: int, x: int, y: int, ex: int, ey: int) -> None:
         """

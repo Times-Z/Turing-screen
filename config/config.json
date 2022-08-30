@@ -1,8 +1,9 @@
 {
     "com_port": "/dev/ttyACM0",
     "baudrate": 115200,
+    "screen_brightness": "high",
     "assets_dir": "assets/",
-    "theme": "template.png",
+    "theme": "dark",
     "refresh_interval": 1,
     "display_width": 320,
     "display_height": 420,

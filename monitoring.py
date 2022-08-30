@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 import threading
-from time import sleep
+from time import time
 from tracemalloc import Frame
 from typing import Callable
 
 import psutil
 import pyamdgpuinfo
 import serial
+from psutil._common import bytes2human
 
 from Class import Com, Config, Display, Signal
 
@@ -23,7 +24,7 @@ def sigHandler(signum: int, frame: Frame):
 
 def generateThread(target: Callable, kwargs: dict) -> threading.Thread:
     """
-        Generate a thread with target and kwargs
+        Generate a thread with target function and kwargs
     """
     return threading.Thread(target=target, kwargs=kwargs)
 
@@ -31,104 +32,132 @@ def generateThread(target: Callable, kwargs: dict) -> threading.Thread:
 if __name__ == "__main__":
 
     config = Config().load()
-    theme = config.get("assets_dir") + "themes/" + config.get("theme")
+    theme = config.get("assets_dir") + "themes/" + config.get("theme") + ".png"
 
     Signal().makeHandler(sigHandler)
     serial_com = serial.Serial(config.get(
         "com_port"), config.get("baudrate"), timeout=1, rtscts=1)
-    com = Com(serial_com)
+    com = Com(serial_com, config)
     display = Display(com, serial_com, config)
 
-    # Display background image
     display.DisplayBitmap(theme)
+    display.DisplayText(str(psutil.users()
+                        [0].name), 80, 235, background_image=theme)
+    # display.DisplayBitmap(config.get("assets_dir") + "imgs/heart.gif", 100,300)
 
     while not stop:
+        start_time = time()  # start time of the loop
+
         threads = []
 
         text_information = {
             "cpu_load": {
                 "text": str(psutil.cpu_percent()) + " %",
                 "x": 80,
-                "y": 30,
+                "y": 17,
                 "background_image": theme,
             },
             "cpu_freq": {
                 "text": str(round(psutil.cpu_freq().current / 1000, 1)) + " Ghz",
-                "x": 160,
-                "y": 30,
+                "x": 155,
+                "y": 17,
                 "background_image": theme,
             },
             "cpu_temp": {
-                "text": str(round(psutil.sensors_temperatures().get(config.get("cpu_temp_device_name"))[0].current,1)) + " °",
-                "x": 240,
-                "y": 30,
+                "text": str(round(psutil.sensors_temperatures().get(config.get("cpu_temp_device_name"))[0].current, 1)) + " °",
+                "x": 260,
+                "y": 17,
                 "background_image": theme,
             },
             "gpu_load": {
                 "text": str(round(pyamdgpuinfo.get_gpu(0).query_load(), 1)) + " %",
                 "x": 80,
-                "y": 90,
+                "y": 67,
                 "background_image": theme,
             },
             "gpu_power": {
                 "text": str(round(pyamdgpuinfo.get_gpu(0).query_power(), 1)) + " Watt",
-                "x": 160,
-                "y": 90,
+                "x": 155,
+                "y": 67,
                 "background_image": theme,
             },
             "gpu_temp": {
                 "text": str(round(pyamdgpuinfo.get_gpu(0).query_temperature(), 1)) + " °",
-                "x": 240,
-                "y": 90,
+                "x": 260,
+                "y": 67,
                 "background_image": theme,
             },
             "ram_percent_usage": {
                 "text": str(psutil.virtual_memory().percent) + " %",
                 "x": 80,
-                "y": 140,
+                "y": 117,
                 "background_image": theme,
             },
             "ram_number_usage": {
-                "text": str(round(psutil.virtual_memory().used /2.**30, 1)) + " / " + str(round(psutil.virtual_memory().total /2.**30, 1)) + " Gb",
-                "x": 160,
-                "y": 140,
+                "text": str(bytes2human(psutil.virtual_memory().used)) + " in use",
+                "x": 155,
+                "y": 117,
                 "background_image": theme,
             },
-            "lan_ip": {
-                "text": str(psutil.net_if_addrs().get(config.get("network_interface"))[0].address),
+            "disk_usage_root": {
+                "text": "/ : " + str(psutil.disk_usage("/").percent) + " %",
                 "x": 80,
-                "y": 195,
+                "y": 157,
                 "background_image": theme,
-            }
+                "font_size": 14,
+            },
+            "disk_usage_home": {
+                "text": "/home : " + str(psutil.disk_usage("/home").percent) + " %",
+                "x": 155,
+                "y": 157,
+                "background_image": theme,
+                "font_size": 14,
+            },
+            "disk_usage_hdd": {
+                "text": "/mnt/HDD : " + str(psutil.disk_usage("/mnt/HDD").percent) + " %",
+                "x": 80,
+                "y": 177,
+                "background_image": theme,
+                "font_size": 14,
+            },
+            "disk_usage_encrypted": {
+                "text": "/mnt/DATA_ENCRYPTED : " + str(psutil.disk_usage("/mnt/DATA_ENCRYPTED").percent) + " %",
+                "x": 80,
+                "y": 197,
+                "background_image": theme,
+                "font_size": 14,
+            },
         }
 
         for name in text_information:
             threads.append(generateThread(
                 display.DisplayText, text_information.get(name)))
 
+        # for picture in sorted(os.listdir(config.get("assets_dir") + "imgs/heart")):
+        #     threads.append(generateThread(
+        #         display.DisplayBitmap, {
+        #         "bitmap_path": config.get("assets_dir") + "imgs/heart/" + picture,
+        #         "x": 100,
+        #         "y": 300,
+        #     }))
+
+        # threads.append(generateThread(
+        #     display.DisplayBitmap, {
+        #     "bitmap_path": config.get("assets_dir") + "imgs/heart.gif",
+        #     "x": 100,
+        #     "y": 300,
+        # }))
+
         for thread in threads:
+            if not serial_com.isOpen():
+                serial_com.open()
             thread.start()
-            sleep(config.get('refresh_interval'))
+            thread.join()
+            if serial_com.isOpen():
+                serial_com.close()
+        print("FPS: ", 1.0 / (time() - start_time), end="\r", flush=True, )
 
-    # while not stop:
-        # DisplayText(lcd_comm, str(datetime.now().time()), 160, 2,
-        #             font=ASSET_DIR + "fonts/roboto/Roboto-Bold.ttf",
-        #             font_size=20,
-        #             font_color=(255, 0, 0),
-        #             background_image=ASSET_DIR + "themes/3.5inchTheme2_theme_background.png")
-
-        # DisplayProgressBar(lcd_comm, 10, 40,
-        #                    width=140, height=30,
-        #                    min_value=0, max_value=100, value=bar_value,
-        #                    bar_color=(255, 255, 0), bar_outline=True,
-        #                    background_image="res/example.png")
-
-        # DisplayProgressBar(lcd_comm, 160, 40,
-        #                    width=140, height=30,
-        #                    min_value=0, max_value=19, value=bar_value % 20,
-        #                    bar_color=(0, 255, 0), bar_outline=False,
-        #                    background_image="res/example.png")
-
-        # bar_value = (bar_value + 2) % 101
-
-    serial_com.close()
+    if not serial_com.isOpen():
+        serial_com.open()
+    com.Clear()
+    com.ScreenOff()
