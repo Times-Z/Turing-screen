@@ -1,0 +1,11 @@
+{
+    "com_port": "/dev/ttyACM0",
+    "baudrate": 115200,
+    "assets_dir": "assets/",
+    "theme": "template.png",
+    "refresh_interval": 1,
+    "display_width": 320,
+    "display_height": 420,
+    "network_interface": "enp34s0",
+    "cpu_temp_device_name": "k10temp"
+}

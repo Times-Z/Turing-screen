@@ -1,53 +1,114 @@
 #!/usr/bin/env python3
-import os
-import signal
-import psutil
-from Class import Com, Display
-import pyamdgpuinfo
+import threading
+from time import sleep
+from tracemalloc import Frame
+from typing import Callable
 
+import psutil
+import pyamdgpuinfo
 import serial
 
-COM_PORT = "/dev/ttyACM0"
-BAUDRATE = 115200
-ASSET_DIR = "assets/"
-THEME = "template.png"
-
-DISPLAY_WIDTH = 320
-DISPLAY_HEIGHT = 480
+from Class import Com, Config, Display, Signal
 
 stop = False
 
 
-def makeHandler():
-    signal.signal(signal.SIGINT, sigHandler)
-    signal.signal(signal.SIGTERM, sigHandler)
-    if os.name == 'posix':
-        signal.signal(signal.SIGQUIT, sigHandler)
-
-
-def sigHandler(signum, frame):
+def sigHandler(signum: int, frame: Frame):
+    """
+        Used to stop application with signal after send a full frame to device
+    """
     global stop
     stop = True
 
 
+def generateThread(target: Callable, kwargs: dict) -> threading.Thread:
+    """
+        Generate a thread with target and kwargs
+    """
+    return threading.Thread(target=target, kwargs=kwargs)
+
+
 if __name__ == "__main__":
 
-    makeHandler()
+    config = Config().load()
+    theme = config.get("assets_dir") + "themes/" + config.get("theme")
 
-    serial_com = serial.Serial(COM_PORT, BAUDRATE, timeout=1, rtscts=1)
+    Signal().makeHandler(sigHandler)
+    serial_com = serial.Serial(config.get(
+        "com_port"), config.get("baudrate"), timeout=1, rtscts=1)
     com = Com(serial_com)
-    display = Display(com, serial_com, DISPLAY_WIDTH, DISPLAY_HEIGHT)
+    display = Display(com, serial_com, config)
 
     # Display background image
-    display.DisplayBitmap(ASSET_DIR + "themes/" + THEME)
+    display.DisplayBitmap(theme)
 
     while not stop:
-        display.DisplayText(str(psutil.cpu_percent()) + " %", 80,
-                            30, background_image=ASSET_DIR + "themes/" + THEME, sleep_time=2)
+        threads = []
 
-        display.DisplayText(str(pyamdgpuinfo.get_gpu(0).query_load()) + " %", 80,
-                            50, background_image=ASSET_DIR + "themes/" + THEME, sleep_time=2)
-        # sleep(5)
+        text_information = {
+            "cpu_load": {
+                "text": str(psutil.cpu_percent()) + " %",
+                "x": 80,
+                "y": 30,
+                "background_image": theme,
+            },
+            "cpu_freq": {
+                "text": str(round(psutil.cpu_freq().current / 1000, 1)) + " Ghz",
+                "x": 160,
+                "y": 30,
+                "background_image": theme,
+            },
+            "cpu_temp": {
+                "text": str(round(psutil.sensors_temperatures().get(config.get("cpu_temp_device_name"))[0].current,1)) + " °",
+                "x": 240,
+                "y": 30,
+                "background_image": theme,
+            },
+            "gpu_load": {
+                "text": str(round(pyamdgpuinfo.get_gpu(0).query_load(), 1)) + " %",
+                "x": 80,
+                "y": 90,
+                "background_image": theme,
+            },
+            "gpu_power": {
+                "text": str(round(pyamdgpuinfo.get_gpu(0).query_power(), 1)) + " Watt",
+                "x": 160,
+                "y": 90,
+                "background_image": theme,
+            },
+            "gpu_temp": {
+                "text": str(round(pyamdgpuinfo.get_gpu(0).query_temperature(), 1)) + " °",
+                "x": 240,
+                "y": 90,
+                "background_image": theme,
+            },
+            "ram_percent_usage": {
+                "text": str(psutil.virtual_memory().percent) + " %",
+                "x": 80,
+                "y": 140,
+                "background_image": theme,
+            },
+            "ram_number_usage": {
+                "text": str(round(psutil.virtual_memory().used /2.**30, 1)) + " / " + str(round(psutil.virtual_memory().total /2.**30, 1)) + " Gb",
+                "x": 160,
+                "y": 140,
+                "background_image": theme,
+            },
+            "lan_ip": {
+                "text": str(psutil.net_if_addrs().get(config.get("network_interface"))[0].address),
+                "x": 80,
+                "y": 195,
+                "background_image": theme,
+            }
+        }
+
+        for name in text_information:
+            threads.append(generateThread(
+                display.DisplayText, text_information.get(name)))
+
+        for thread in threads:
+            thread.start()
+            sleep(config.get('refresh_interval'))
 
     # while not stop:
         # DisplayText(lcd_comm, str(datetime.now().time()), 160, 2,

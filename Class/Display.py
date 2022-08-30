@@ -6,8 +6,6 @@ from time import sleep
 import serial
 from PIL import Image, ImageDraw, ImageFont
 
-from monitoring import ASSET_DIR
-
 from .Com import Com
 
 
@@ -16,13 +14,13 @@ class Display:
         Display class
     """
 
-    def __init__(self, com: Com, serial: serial, display_width: int, display_height: int) -> None:
+    def __init__(self, com: Com, serial: serial, config: dict) -> None:
         self.com = com
         self.serial = serial
-        self.DISPLAY_WIDTH = display_width
-        self.DISPLAY_HEIGHT = display_height
+        self.DISPLAY_WIDTH = config.get("display_width")
+        self.DISPLAY_HEIGHT = config.get("display_height")
 
-    def DisplayPILImage(self, image: Image, x: int, y: int) -> None:
+    def DisplayPILImage(self, image: Image, x: int, y: int, sleep_time: float = 0.01) -> None:
         """
             Display Pillow image
 
@@ -57,7 +55,7 @@ class Display:
         if len(line) > 0:
             self.serial.write(line)
 
-        sleep(0.01)  # Wait 10 ms after picture display
+        sleep(sleep_time)
 
     def DisplayBitmap(self, bitmap_path: str, x=0, y=0) -> None:
         """
@@ -67,10 +65,10 @@ class Display:
         self.DisplayPILImage(image, x, y)
 
     def DisplayText(self, text: str, x=0, y=0,
-                    font=ASSET_DIR + "fonts/roboto/Roboto-Regular.ttf",
+                    font="assets/fonts/roboto/Roboto-Regular.ttf",
                     font_size=20,
-                    font_color=(0, 0, 0),
-                    background_color=(255, 255, 255),
+                    font_color=(255, 255, 255),
+                    background_color=(0, 0, 0),
                     background_image: str = None,
                     sleep_time: int = None) -> None:
         """
@@ -96,14 +94,13 @@ class Display:
 
         # Crop text bitmap to keep only the text
         ascent, descent = font.getmetrics()
-        text_width = font.getmask(text).getbbox()[2]
+        text_width = font.getmask(text).getbbox()[2] + (ascent - 7)
         text_height = font.getmask(text).getbbox()[3] + descent
         text_image = text_image.crop(box=(x, y, min(
             x + text_width, self.DISPLAY_WIDTH), min(y + text_height, self.DISPLAY_HEIGHT)))
 
-        self.DisplayPILImage(text_image, x, y)
-        if sleep_time:
-            sleep(sleep_time)
+        self.DisplayPILImage(text_image, x, y, 2)
+
 
     def DisplayProgressBar(self, x: int, y: int, width: int, height: int, min_value=0, max_value=100,
                            value=50,
