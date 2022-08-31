@@ -11,7 +11,7 @@ import pyamdgpuinfo
 import serial
 from psutil._common import bytes2human
 
-from Class import Com, Config, Display, Signal
+from Class import Com, Config, Display, Hardware, Signal
 
 stop = False
 
@@ -41,11 +41,15 @@ if __name__ == "__main__":
         "com_port"), config.get("baudrate"), timeout=1, rtscts=1)
     com = Com(serial_com, config)
     display = Display(com, serial_com, config)
+    hardware = Hardware()
 
     display.DisplayBitmap(theme)
     display.DisplayText(str(psutil.users()
                         [0].name), 80, 235, background_image=theme)
     # display.DisplayBitmap(config.get("assets_dir") + "imgs/heart.gif", 100,300)
+
+    # print(hardware.gpuGetLoad())
+    # exit()
 
     while not stop:
         start_time = time()  # start time of the loop
@@ -54,49 +58,49 @@ if __name__ == "__main__":
 
         text_information = {
             "cpu_load": {
-                "text": str(psutil.cpu_percent()) + " %",
+                "text": hardware.cpuGetCurrentLoad(),
                 "x": 80,
                 "y": 17,
                 "background_image": theme,
             },
             "cpu_freq": {
-                "text": str(round(psutil.cpu_freq().current / 1000, 1)) + " Ghz",
+                "text": hardware.cpuGetCurrentFreq(),
                 "x": 155,
                 "y": 17,
                 "background_image": theme,
             },
             "cpu_temp": {
-                "text": str(round(psutil.sensors_temperatures().get(config.get("cpu_temp_device_name"))[0].current, 1)) + " °",
+                "text": hardware.cpuGetCurrentTemp(True),
                 "x": 260,
                 "y": 17,
                 "background_image": theme,
             },
             "gpu_load": {
-                "text": str(round(pyamdgpuinfo.get_gpu(0).query_load(), 1)) + " %",
+                "text": hardware.gpuGetLoad(),
                 "x": 80,
                 "y": 67,
                 "background_image": theme,
             },
             "gpu_power": {
-                "text": str(round(pyamdgpuinfo.get_gpu(0).query_power(), 1)) + " Watt",
+                "text": hardware.gpuGetPower(),
                 "x": 155,
                 "y": 67,
                 "background_image": theme,
             },
             "gpu_temp": {
-                "text": str(round(pyamdgpuinfo.get_gpu(0).query_temperature(), 1)) + " °",
+                "text": hardware.gpuGetTemp(),
                 "x": 260,
                 "y": 67,
                 "background_image": theme,
             },
             "ram_percent_usage": {
-                "text": str(psutil.virtual_memory().percent) + " %",
+                "text": hardware.ramGetPercent(),
                 "x": 80,
                 "y": 117,
                 "background_image": theme,
             },
             "ram_number_usage": {
-                "text": str(bytes2human(psutil.virtual_memory().used)) + " in use",
+                "text": hardware.ramGetUsed() + " in use",
                 "x": 155,
                 "y": 117,
                 "background_image": theme,
@@ -131,11 +135,11 @@ if __name__ == "__main__":
             },
         }
 
-        if config.get("show_fps"):
+        if config.get("fps").get("show"):
             text_information['fps'] = {
                 "text": "FPS : " + str(round(1.0 / (time() - start_time), 1)),
-                "x": 265,
-                "y": 465,
+                "x": config.get("fps").get("position").get("x"),
+                "y": config.get("fps").get("position").get("y"),
                 "background_image": theme,
                 "font_size": 12,
                 "font_color": (98, 114, 164)
@@ -166,7 +170,7 @@ if __name__ == "__main__":
             thread.join()
             if serial_com.isOpen():
                 serial_com.close()
-        print("FPS: ", round(1.0 / (time() - start_time), 1),
+        print("Total frame/s: ", round(1.0 / (time() - start_time), 1),
               end="\r", flush=True, )
 
     if not serial_com.isOpen():

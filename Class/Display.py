@@ -63,13 +63,13 @@ class Display:
             except EOFError:
                 pass  # end of sequence gif
 
-
     def DisplayBitmap(self, bitmap_path: str, x=0, y=0) -> None:
         """
             Display bitmap on 0/0 by default
         """
         image = Image.open(bitmap_path)
-        self.DisplayPILImage(image, x, y, True if ".gif" in bitmap_path else False)
+        self.DisplayPILImage(
+            image, x, y, True if ".gif" in bitmap_path else False)
 
     def DisplayText(self, text: str, x=0, y=0,
                     font="assets/fonts/roboto/Roboto-Regular.ttf",

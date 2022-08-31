@@ -9,5 +9,20 @@
     "display_height": 480,
     "network_interface": "enp34s0",
     "cpu_temp_device_name": "k10temp",
-    "show_fps": true
+    "fps": {
+        "show": true,
+        "position": {
+            "x": 265,
+            "y": 465
+        }
+    },
+    "dynamic_text_information" : [
+        {
+            "cpu_load": {
+                "x": 80,
+                "y": 17,
+                "transparent": true
+            }
+        }
+    ]
 }
