@@ -48,11 +48,14 @@ if __name__ == "__main__":
                         [0].name), 80, 235, background_image=theme)
     # display.DisplayBitmap(config.get("assets_dir") + "imgs/heart.gif", 100,300)
 
-    # print(hardware.gpuGetLoad())
+    # print(hardware.diskGetTotal('/'))
+    # print(hardware.diskGetUsed('/'))
+    # print(hardware.diskGetFree('/'))
+    # print(hardware.diskGetPercent('/'))
     # exit()
 
     while not stop:
-        start_time = time()  # start time of the loop
+        start_time = time()
 
         threads = []
 
@@ -106,28 +109,28 @@ if __name__ == "__main__":
                 "background_image": theme,
             },
             "disk_usage_root": {
-                "text": "/ : " + str(psutil.disk_usage("/").percent) + " %",
+                "text": "/ : " + hardware.diskGetPercent('/'),
                 "x": 80,
                 "y": 157,
                 "background_image": theme,
                 "font_size": 14,
             },
             "disk_usage_home": {
-                "text": "/home : " + str(psutil.disk_usage("/home").percent) + " %",
+                "text": "/home : " + hardware.diskGetPercent('/home'),
                 "x": 155,
                 "y": 157,
                 "background_image": theme,
                 "font_size": 14,
             },
             "disk_usage_hdd": {
-                "text": "/mnt/HDD : " + str(psutil.disk_usage("/mnt/HDD").percent) + " %",
+                "text": "/mnt/HDD : " + hardware.diskGetPercent('/mnt/HDD'),
                 "x": 80,
                 "y": 177,
                 "background_image": theme,
                 "font_size": 14,
             },
             "disk_usage_encrypted": {
-                "text": "/mnt/DATA_ENCRYPTED : " + str(psutil.disk_usage("/mnt/DATA_ENCRYPTED").percent) + " %",
+                "text": "/mnt/DATA_ENCRYPTED : " + hardware.diskGetPercent('/mnt/DATA_ENCRYPTED'),
                 "x": 80,
                 "y": 197,
                 "background_image": theme,

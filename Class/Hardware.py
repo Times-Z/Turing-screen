@@ -17,6 +17,7 @@ class Hardware:
     CPU_FREQ_ATTR = ['current', 'min', 'max']
     RAM_INFO_ATTR = ['total', 'available', 'used', 'free', 'percent']
     SWAP_INFO_ATTR = ['total', 'used', 'free', 'percent', 'sin', 'sout']
+    DISK_INFO_ATTR = ['total', 'used', 'free', 'percent']
     GPU_METHOD = ['gpuLoad', 'gpuPower', 'gpuTemp']
 
     def __init__(self) -> None:
@@ -59,42 +60,34 @@ class Hardware:
             return f'{round(value, 1)}{endString}'
         return f'{value}{endString}'
 
-    def __ramGetInfos(self, attribute: str) -> str:
+    def __ramGetInfos(self, attribute: str) -> int:
         """
             Wrapper for RAM infos
         """
         if attribute not in self.RAM_INFO_ATTR:
             raise ValueError('Attribute can only be one of ' +
                              str(self.RAM_INFO_ATTR))
-        data = getattr(psutil.virtual_memory(), attribute)
-        if attribute == 'percent':
-            return self.__formatString(data, endString='%')
-        return bytes2human(data)
+        return getattr(psutil.virtual_memory(), attribute)
 
-    def __cpuGetFreqs(self, attribute: str, Ghz: bool = True) -> str:
+    def __cpuGetFreqs(self, attribute: str) -> int:
         """
             Wrapper for CPU freqs
         """
         if attribute not in self.CPU_FREQ_ATTR:
             raise ValueError('Attribute can only be one of ' +
                              str(self.CPU_FREQ_ATTR))
-        if Ghz:
-            return self.__formatString(getattr(psutil.cpu_freq(), attribute) / 1000, True, "Ghz")
-        return self.__formatString(getattr(psutil.cpu_freq(), attribute), True, "Mhz")
+        return getattr(psutil.cpu_freq(), attribute)
 
-    def __swapGetInfos(self, attribute: str) -> str:
+    def __swapGetInfos(self, attribute: str) -> int:
         """
             Wrapper for SWAP infos
         """
         if attribute not in self.SWAP_INFO_ATTR:
             raise ValueError('Attribute can only be one of ' +
                              str(self.SWAP_INFO_ATTR))
-        data = getattr(psutil.swap_memory(), attribute)
-        if attribute == 'percent':
-            return self.__formatString(data, endString='%')
-        return bytes2human(data)
+        return getattr(psutil.swap_memory(), attribute)
 
-    def __gpuGetInfos(self, attribute: str) -> str:
+    def __gpuGetInfos(self, attribute: str) -> int:
         """
             Wrapper for GPUs class
         """
@@ -103,13 +96,19 @@ class Hardware:
                              str(self.GPU_METHOD))
         match self.gpu_brand:
             case 'nvidia':
-                return 'nvidia'
+                return 'nvidia gpus are not currently supported'
             case 'amd':
                 return getattr(Radeon, attribute)(self.gpu)
             case 'intel':
-                return 'intel'
+                return 'intel gpus are not currently supported'
             case default:
-                return 'default'
+                return 'unknow gpus are not currently supported'
+
+    def __diskGetUsage(self, path: str, attribute: str) -> int:
+        if attribute not in self.DISK_INFO_ATTR:
+            raise ValueError('Attribute can only be one of ' +
+                             str(self.DISK_INFO_ATTR))
+        return getattr(psutil.disk_usage(path), attribute)
 
     def cpuGetCount(self, logical: bool = True) -> str:
         """
@@ -139,85 +138,91 @@ class Hardware:
         """
             Get CPU current frequency
         """
-        return self.__cpuGetFreqs('current', Ghz)
+        if Ghz:
+            return self.__formatString(self.__cpuGetFreqs('current') / 1000, True, 'Ghz')
+        return self.__formatString(self.__cpuGetFreqs('current'), True, 'Mhz')
 
     def cpuGetMaxFreq(self, Ghz: bool = True) -> str:
         """
             Get CPU max frequency
         """
-        return self.__cpuGetFreqs('max', Ghz)
+        if Ghz:
+            return self.__formatString(self.__cpuGetFreqs('max') / 1000, True, 'Ghz')
+        return self.__formatString(self.__cpuGetFreqs('max'), True, 'Mhz')
 
     def cpuGetMinFreq(self, Ghz: bool = True) -> str:
         """
             Get CPU min frequency
         """
-        return self.__cpuGetFreqs('min', Ghz)
+        if Ghz:
+            return self.__formatString(self.__cpuGetFreqs('min') / 1000, True, 'Ghz')
+        return self.__formatString(self.__cpuGetFreqs('min'), True, 'Mhz')
 
     def ramGetPercent(self) -> str:
         """
             Get RAM total value
         """
-        return self.__ramGetInfos('percent')
+        return self.__formatString(self.__ramGetInfos('percent'), endString='%')
 
     def ramGetTotal(self) -> str:
         """
             Get RAM total value
         """
-        return self.__ramGetInfos('total')
+        return bytes2human(self.__ramGetInfos('total'))
 
     def ramGetAvailable(self) -> str:
         """
             Get RAM available value
         """
-        return self.__ramGetInfos('available')
+        return bytes2human(self.__ramGetInfos('available'))
 
     def ramGetUsed(self) -> str:
         """
             Get RAM used value
         """
-        return self.__ramGetInfos('used')
+        return bytes2human(self.__ramGetInfos('used'))
 
     def ramGetFree(self) -> str:
         """
             Get RAM free value
         """
-        return self.__ramGetInfos('free')
+        return bytes2human(self.__ramGetInfos('free'))
 
     def swapGetTotal(self) -> str:
         """
             Get SWAP total value
         """
-        return self.__swapGetInfos('total')
+        return self.__formatString(self.__swapGetInfos('total'), endString='%')
 
     def swapGetUsed(self) -> str:
         """
             Get SWAP used value
         """
-        return self.__swapGetInfos('used')
+        return bytes2human(self.__swapGetInfos('used'))
 
     def swapGetFree(self) -> str:
         """
             Get SWAP free value
         """
-        return self.__swapGetInfos('free')
+        return bytes2human(self.__swapGetInfos('free'))
 
     def swapGetPercent(self) -> str:
         """
             Get SWAP percent value
         """
-        return self.__swapGetInfos('percent')
+        return bytes2human(self.__swapGetInfos('percent'))
 
     def swapGetSin(self) -> str:
         """
             Get SWAP sin value
         """
-        return self.__swapGetInfos('sin')
+        return bytes2human(self.__swapGetInfos('sin'))
 
     def swapGetSout(self) -> str:
         """
             Get SWAP sout value
         """
-        return self.__swapGetInfos('sout')
+        return bytes2human(self.__swapGetInfos('sout'))
 
     def gpuGetLoad(self) -> str:
         """
@@ -237,3 +242,26 @@ class Hardware:
         """
         return self.__formatString(self.__gpuGetInfos('gpuTemp'), endString='°C')
 
+    def diskGetTotal(self, path: str) -> str:
+        """
+            Get the disk total size
+        """
+        return bytes2human(self.__diskGetUsage(path, 'total'))
+
+    def diskGetUsed(self, path: str) -> str:
+        """
+            Get the disk used space
+        """
+        return bytes2human(self.__diskGetUsage(path, 'used'))
+
+    def diskGetFree(self, path: str) -> str:
+        """
+            Get the disk free space
+        """
+        return bytes2human(self.__diskGetUsage(path, 'free'))
+
+    def diskGetPercent(self, path: str) -> str:
+        """
+            Get the disk percent
+        """
+        return self.__formatString(self.__diskGetUsage(path, 'percent'), endString='%')
