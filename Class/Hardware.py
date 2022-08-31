@@ -57,8 +57,8 @@ class Hardware:
             Format float or int to string
         """
         if rounded:
-            return f'{round(value, 1)}{endString}'
-        return f'{value}{endString}'
+            return f'{round(value, 1)} {endString}'
+        return f'{value} {endString}'
 
     def __ramGetInfos(self, attribute: str) -> int:
         """
@@ -265,3 +265,9 @@ class Hardware:
             Get the disk percent
         """
         return self.__formatString(self.__diskGetUsage(path, 'percent'), endString='%')
+
+    def userGetName(self) -> str:
+        """
+            Get the current user name
+        """
+        return psutil.users()[0].name

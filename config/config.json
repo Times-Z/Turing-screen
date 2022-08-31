@@ -1,16 +1,16 @@
 {
     "com_port": "/dev/ttyACM0",
-    "screen_brightness": "high",
+    "screen_brightness": "medium",
     "assets_dir": "assets/",
     "theme": "dark",
     "display_width": 320,
     "display_height": 480,
-    "network_interface": "enp34s0",
-    "dynamic_text_information": [
+    "hot_reload_config": true,
+    "dynamic_text_informations": [
         {
             "CPU_load": {
                 "metric": "cpuGetCurrentLoad",
-                "x": 80,
+                "x": 70,
                 "y": 17,
                 "transparent": true
             }
@@ -18,7 +18,7 @@
         {
             "CPU_freq": {
                 "metric": "cpuGetCurrentFreq",
-                "x": 155,
+                "x": 143,
                 "y": 17,
                 "transparent": true
             }
@@ -34,7 +34,7 @@
         {
             "GPU_load": {
                 "metric": "gpuGetLoad",
-                "x": 80,
+                "x": 70,
                 "y": 67,
                 "transparent": true
             }
@@ -42,7 +42,7 @@
         {
             "GPU_power": {
                 "metric": "gpuGetPower",
-                "x": 155,
+                "x": 143,
                 "y": 67,
                 "transparent": true
             }
@@ -58,7 +58,7 @@
         {
             "RAM_load_percent": {
                 "metric": "ramGetPercent",
-                "x": 80,
+                "x": 70,
                 "y": 117,
                 "transparent": true
             }
@@ -66,7 +66,7 @@
         {
             "RAM_load_number": {
                 "metric": "ramGetUsed",
-                "x": 155,
+                "x": 143,
                 "y": 117,
                 "transparent": true
             }
@@ -76,7 +76,7 @@
                 "prefix_txt": "/",
                 "metric": "diskGetPercent",
                 "param": "/",
-                "x": 80,
+                "x": 70,
                 "y": 157,
                 "transparent": true,
                 "font_size": 14
@@ -87,7 +87,7 @@
                 "prefix_txt": "/home",
                 "metric": "diskGetPercent",
                 "param": "/home",
-                "x": 155,
+                "x": 143,
                 "y": 157,
                 "transparent": true,
                 "font_size": 14
@@ -98,7 +98,7 @@
                 "prefix_txt": "/mnt/HDD",
                 "metric": "diskGetPercent",
                 "param": "/mnt/HDD",
-                "x": 80,
+                "x": 70,
                 "y": 177,
                 "transparent": true,
                 "font_size": 14
@@ -109,10 +109,20 @@
                 "prefix_txt": "/mnt/DATA_ENCRYPTED",
                 "metric": "diskGetPercent",
                 "param": "/mnt/DATA_ENCRYPTED",
-                "x": 80,
+                "x": 70,
                 "y": 197,
                 "transparent": true,
                 "font_size": 14
+            }
+        }
+    ],
+    "static_text_informations": [
+        {
+            "USER_info": {
+                "metric": "userGetName",
+                "x": 80,
+                "y": 235,
+                "transparent": true
             }
         }
     ],

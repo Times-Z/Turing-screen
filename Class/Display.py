@@ -13,13 +13,13 @@ class Display:
         Display class
     """
 
-    def __init__(self, com: Com, serial: serial, config: dict) -> None:
+    def __init__(self, com: Com, serial: serial.Serial, config: dict) -> None:
         self.com = com
         self.serial = serial
         self.DISPLAY_WIDTH = config.get("display_width", 320)
         self.DISPLAY_HEIGHT = config.get("display_height", 480)
 
-    def DisplayPILImage(self, image: Image, x: int, y: int, gif: bool = False) -> None:
+    def DisplayPILImage(self, image: Image.Image, x: int, y: int, gif: bool = False) -> None:
         """
             Display Pillow image
 
@@ -75,7 +75,7 @@ class Display:
                     font_size=20,
                     font_color=(255, 255, 255),
                     background_color=(0, 0, 0),
-                    background_image: str = None) -> None:
+                    background_image: str = '') -> None:
         """
         Convert text to bitmap using PIL and display it
 
@@ -84,7 +84,7 @@ class Display:
         assert len(text) > 0, 'Text must not be empty'
         assert font_size > 0, "Font size must be > 0"
 
-        if background_image is None:
+        if len(background_image) <= 0:
             text_image = Image.new(
                 'RGB', (self.DISPLAY_WIDTH, self.DISPLAY_HEIGHT), background_color)
         else:
@@ -107,7 +107,7 @@ class Display:
                            bar_color=(0, 0, 0),
                            bar_outline=True,
                            background_color=(255, 255, 255),
-                           background_image: str = None) -> None:
+                           background_image: str = '') -> None:
         """
         Generate a progress bar and display it
 
@@ -118,7 +118,7 @@ class Display:
         assert y + height <= self.DISPLAY_HEIGHT, 'Progress bar height exceeds display height'
         assert min_value <= value <= max_value, 'Progress bar value shall be between min and max'
 
-        if background_image is None:
+        if len(background_image) <= 0:
             bar_image = Image.new('RGB', (width, height), background_color)
         else:
             bar_image = Image.open(background_image)

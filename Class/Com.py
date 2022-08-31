@@ -33,7 +33,7 @@ class Com:
         self.serial = serial.Serial(port, 115200, timeout=1, rtscts=1)
         self.ScreenOn()
         self.SetBrightness(self.BRIGHTNESS_LEVEL.get(
-            config.get('screen_brightness', 0)))
+            config.get('screen_brightness', 0), 0))
 
     def auto_detect_com_port(self) -> str | None:
         """
