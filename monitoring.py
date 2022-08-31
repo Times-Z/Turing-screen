@@ -1,15 +1,11 @@
 #!/usr/bin/env python3
 
-import os
 import threading
 from time import time
 from tracemalloc import Frame
 from typing import Callable
 
 import psutil
-import pyamdgpuinfo
-import serial
-from psutil._common import bytes2human
 
 from Class import Com, Config, Display, Hardware, Signal
 
@@ -34,13 +30,12 @@ def generateThread(target: Callable, kwargs: dict) -> threading.Thread:
 if __name__ == "__main__":
 
     config = Config().load()
-    theme = config.get("assets_dir") + "themes/" + config.get("theme") + ".png"
+    theme = config.get('assets_dir', 'assets/') + 'themes/' + \
+        config.get('theme', 'dark') + '.png'
 
     Signal().makeHandler(sigHandler)
-    serial_com = serial.Serial(config.get(
-        "com_port"), config.get("baudrate"), timeout=1, rtscts=1)
-    com = Com(serial_com, config)
-    display = Display(com, serial_com, config)
+    com = Com(config)
+    display = Display(com, com.serial, config)
     hardware = Hardware()
 
     display.DisplayBitmap(theme)
@@ -48,108 +43,46 @@ if __name__ == "__main__":
                         [0].name), 80, 235, background_image=theme)
     # display.DisplayBitmap(config.get("assets_dir") + "imgs/heart.gif", 100,300)
 
-    # print(hardware.diskGetTotal('/'))
-    # print(hardware.diskGetUsed('/'))
-    # print(hardware.diskGetFree('/'))
-    # print(hardware.diskGetPercent('/'))
+    # print(config.get('show_fps', False))
     # exit()
-
     while not stop:
         start_time = time()
 
         threads = []
 
-        text_information = {
-            "cpu_load": {
-                "text": hardware.cpuGetCurrentLoad(),
-                "x": 80,
-                "y": 17,
-                "background_image": theme,
-            },
-            "cpu_freq": {
-                "text": hardware.cpuGetCurrentFreq(),
-                "x": 155,
-                "y": 17,
-                "background_image": theme,
-            },
-            "cpu_temp": {
-                "text": hardware.cpuGetCurrentTemp(True),
-                "x": 260,
-                "y": 17,
-                "background_image": theme,
-            },
-            "gpu_load": {
-                "text": hardware.gpuGetLoad(),
-                "x": 80,
-                "y": 67,
-                "background_image": theme,
-            },
-            "gpu_power": {
-                "text": hardware.gpuGetPower(),
-                "x": 155,
-                "y": 67,
-                "background_image": theme,
-            },
-            "gpu_temp": {
-                "text": hardware.gpuGetTemp(),
-                "x": 260,
-                "y": 67,
-                "background_image": theme,
-            },
-            "ram_percent_usage": {
-                "text": hardware.ramGetPercent(),
-                "x": 80,
-                "y": 117,
-                "background_image": theme,
-            },
-            "ram_number_usage": {
-                "text": hardware.ramGetUsed() + " in use",
-                "x": 155,
-                "y": 117,
-                "background_image": theme,
-            },
-            "disk_usage_root": {
-                "text": "/ : " + hardware.diskGetPercent('/'),
-                "x": 80,
-                "y": 157,
-                "background_image": theme,
-                "font_size": 14,
-            },
-            "disk_usage_home": {
-                "text": "/home : " + hardware.diskGetPercent('/home'),
-                "x": 155,
-                "y": 157,
-                "background_image": theme,
-                "font_size": 14,
-            },
-            "disk_usage_hdd": {
-                "text": "/mnt/HDD : " + hardware.diskGetPercent('/mnt/HDD'),
-                "x": 80,
-                "y": 177,
-                "background_image": theme,
-                "font_size": 14,
-            },
-            "disk_usage_encrypted": {
-                "text": "/mnt/DATA_ENCRYPTED : " + hardware.diskGetPercent('/mnt/DATA_ENCRYPTED'),
-                "x": 80,
-                "y": 197,
-                "background_image": theme,
-                "font_size": 14,
-            },
-        }
+        for named_item in config.get('dynamic_text_information'):
+            element = next(iter(named_item.values()))
+            param = element['param'] if 'param' in element else None
+            value = getattr(Hardware, element['metric'])(hardware) if param is None else getattr(
+                Hardware, element['metric'])(hardware, param)
+            text = display.generateText(
+                value, element['prefix_txt'] if 'prefix_txt' in element else '')
 
-        if config.get("fps").get("show"):
-            text_information['fps'] = {
-                "text": "FPS : " + str(round(1.0 / (time() - start_time), 1)),
-                "x": config.get("fps").get("position").get("x"),
-                "y": config.get("fps").get("position").get("y"),
-                "background_image": theme,
-                "font_size": 12,
-                "font_color": (98, 114, 164)
-            }
-        for name in text_information:
-            threads.append(generateThread(
-                display.DisplayText, text_information.get(name)))
+            threads.append(
+                generateThread(
+                    display.DisplayText, {
+                        'text': text,
+                        'x': element['x'],
+                        'y': element['y'],
+                        'background_image': theme if 'transparent' in element and element['transparent'] == True else element['background_image'],
+                        'font_size': element['font_size'] if 'font_size' in element else 20,
+                    })
+            )
+
+        if config.get('show_fps', False):
+            fps_conf = config.get('show_fps', False)
+            if fps_conf['show']:
+                threads.append(
+                    generateThread(
+                        display.DisplayText, {
+                            'text': fps_conf['text'] + str(round(1.0 / (time() - start_time), 1)),
+                            'x': fps_conf['x'],
+                            'y': fps_conf['y'],
+                            'font_color': tuple(fps_conf['font_color']),
+                            'font_size': fps_conf['font_size'],
+                            'background_image': theme if 'transparent' in element and element['transparent'] == True else element['background_image'],
+                        })
+                )
 
         # for picture in sorted(os.listdir(config.get("assets_dir") + "imgs/surf")):
             # threads.append(generateThread(
@@ -167,16 +100,16 @@ if __name__ == "__main__":
         # }))
 
         for thread in threads:
-            if not serial_com.isOpen():
-                serial_com.open()
+            if not com.serial.isOpen():
+                com.serial.open()
             thread.start()
             thread.join()
-            if serial_com.isOpen():
-                serial_com.close()
+            if com.serial.isOpen():
+                com.serial.close()
         print("Total frame/s: ", round(1.0 / (time() - start_time), 1),
               end="\r", flush=True, )
 
-    if not serial_com.isOpen():
-        serial_com.open()
+    if not com.serial.isOpen():
+        com.serial.open()
     com.Clear()
     com.ScreenOff()

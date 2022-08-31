@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import struct
-from time import sleep
 
 import serial
 from PIL import Image, ImageDraw, ImageFont
@@ -17,8 +16,8 @@ class Display:
     def __init__(self, com: Com, serial: serial, config: dict) -> None:
         self.com = com
         self.serial = serial
-        self.DISPLAY_WIDTH = config.get("display_width")
-        self.DISPLAY_HEIGHT = config.get("display_height")
+        self.DISPLAY_WIDTH = config.get("display_width", 320)
+        self.DISPLAY_HEIGHT = config.get("display_height", 480)
 
     def DisplayPILImage(self, image: Image, x: int, y: int, gif: bool = False) -> None:
         """
@@ -137,3 +136,13 @@ class Display:
                            fill=None, outline=bar_color)
 
         self.DisplayPILImage(bar_image, x, y)
+
+    def generateText(self, text: str, prefix: str = None) -> str:
+        """
+            Generate text string for display
+        """
+        txt = ''
+        if prefix:
+            txt = prefix + ' '
+        txt = txt + text
+        return txt

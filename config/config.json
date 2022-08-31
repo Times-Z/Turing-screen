@@ -1,28 +1,132 @@
 {
     "com_port": "/dev/ttyACM0",
-    "baudrate": 115200,
     "screen_brightness": "high",
     "assets_dir": "assets/",
     "theme": "dark",
-    "refresh_interval": 1,
     "display_width": 320,
     "display_height": 480,
     "network_interface": "enp34s0",
-    "cpu_temp_device_name": "k10temp",
-    "fps": {
-        "show": true,
-        "position": {
-            "x": 265,
-            "y": 465
-        }
-    },
-    "dynamic_text_information" : [
+    "dynamic_text_information": [
         {
-            "cpu_load": {
+            "CPU_load": {
+                "metric": "cpuGetCurrentLoad",
                 "x": 80,
                 "y": 17,
                 "transparent": true
             }
+        },
+        {
+            "CPU_freq": {
+                "metric": "cpuGetCurrentFreq",
+                "x": 155,
+                "y": 17,
+                "transparent": true
+            }
+        },
+        {
+            "CPU_temp": {
+                "metric": "cpuGetCurrentTemp",
+                "x": 260,
+                "y": 17,
+                "transparent": true
+            }
+        },
+        {
+            "GPU_load": {
+                "metric": "gpuGetLoad",
+                "x": 80,
+                "y": 67,
+                "transparent": true
+            }
+        },
+        {
+            "GPU_power": {
+                "metric": "gpuGetPower",
+                "x": 155,
+                "y": 67,
+                "transparent": true
+            }
+        },
+        {
+            "GPU_temp": {
+                "metric": "gpuGetTemp",
+                "x": 260,
+                "y": 67,
+                "transparent": true
+            }
+        },
+        {
+            "RAM_load_percent": {
+                "metric": "ramGetPercent",
+                "x": 80,
+                "y": 117,
+                "transparent": true
+            }
+        },
+        {
+            "RAM_load_number": {
+                "metric": "ramGetUsed",
+                "x": 155,
+                "y": 117,
+                "transparent": true
+            }
+        },
+        {
+            "DISK_usage_root": {
+                "prefix_txt": "/",
+                "metric": "diskGetPercent",
+                "param": "/",
+                "x": 80,
+                "y": 157,
+                "transparent": true,
+                "font_size": 14
+            }
+        },
+        {
+            "DISK_usage_home": {
+                "prefix_txt": "/home",
+                "metric": "diskGetPercent",
+                "param": "/home",
+                "x": 155,
+                "y": 157,
+                "transparent": true,
+                "font_size": 14
+            }
+        },
+        {
+            "DISK_usage_HDD": {
+                "prefix_txt": "/mnt/HDD",
+                "metric": "diskGetPercent",
+                "param": "/mnt/HDD",
+                "x": 80,
+                "y": 177,
+                "transparent": true,
+                "font_size": 14
+            }
+        },
+        {
+            "DISK_usage_HDD": {
+                "prefix_txt": "/mnt/DATA_ENCRYPTED",
+                "metric": "diskGetPercent",
+                "param": "/mnt/DATA_ENCRYPTED",
+                "x": 80,
+                "y": 197,
+                "transparent": true,
+                "font_size": 14
+            }
         }
-    ]
+    ],
+    "show_fps": {
+        "show": false,
+        "text": "FPS : ",
+        "x": 265,
+        "y": 465,
+        "font_color": [
+            98,
+            114,
+            164
+        ],
+        "font_size": 12,
+        "transparent": true
+    }
 }

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import serial
+import serial.tools.list_ports
 
 
 class Com:
@@ -15,16 +16,34 @@ class Com:
     SET_BRIGHTNESS = 110
     DISPLAY_BITMAP = 197
     BRIGHTNESS_LEVEL = {
-        "high": 0,
-        "medium": 128,
-        "low": 255
+        'high': 0,
+        'medium': 128,
+        'low': 255
     }
+    COM_PORT = [
+        '/dev/ttyACM0'
+        'COM3'
+    ]
 
-    def __init__(self, serial: serial, config: dict):
-        self.serial = serial
+    def __init__(self, config: dict):
+        if 'com_port' in config:
+            port = config.get('com_port', '/dev/ttyACM0')
+        else:
+            port = self.auto_detect_com_port()
+        self.serial = serial.Serial(port, 115200, timeout=1, rtscts=1)
         self.ScreenOn()
         self.SetBrightness(self.BRIGHTNESS_LEVEL.get(
-            config.get("screen_brightness")))
+            config.get('screen_brightness', 0)))
+
+    def auto_detect_com_port(self) -> str | None:
+        """
+            Try to auto discover port com
+        """
+        ports = serial.tools.list_ports.grep('.', include_links=True)
+        for port in ports:
+            if port.device in self.COM_PORT:
+                return port.device
+            return None
 
     def SendReg(self, cmd: int, x: int, y: int, ex: int, ey: int) -> None:
         """
