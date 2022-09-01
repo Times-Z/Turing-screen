@@ -21,16 +21,16 @@ class Hardware:
     GPU_METHOD = ['gpuLoad', 'gpuPower', 'gpuTemp']
 
     def __init__(self) -> None:
-        self.cpu_brand = self.__getCpuBrand()
-        self.gpu_brand = self.__getGpuBrand()
+        self.cpu_brand: str = self.__getCpuBrand()
+        self.gpu_brand: str = self.__getGpuBrand()
         if self.gpu_brand == 'nvidia':
-            self.gpu = Nvidia()
+            self.gpu: Nvidia = Nvidia()
         elif self.gpu_brand == 'amd':
-            self.gpu = Radeon()
+            self.gpu: Radeon = Radeon()
         else:
-            self.gpu = None
+            self.gpu: None = None
 
-    def __getCpuBrand(self):
+    def __getCpuBrand(self) -> str:
         """
             Get CPU brand based on sensor temparature
         """
@@ -52,7 +52,7 @@ class Hardware:
         else:
             return 'unknow'
 
-    def __formatString(self, value: float | int, rounded: bool = False, endString: str = "") -> str:
+    def __formatString(self, value: float | int, rounded: bool = False, endString: str = '') -> str:
         """
             Format float or int to string
         """

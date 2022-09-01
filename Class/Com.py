@@ -9,28 +9,29 @@ class Com:
         Com port communication
     """
 
-    RESET = 101
-    CLEAR = 102
-    SCREEN_OFF = 108
-    SCREEN_ON = 109
-    SET_BRIGHTNESS = 110
-    DISPLAY_BITMAP = 197
-    BRIGHTNESS_LEVEL = {
+    RESET: int = 101
+    CLEAR: int = 102
+    SCREEN_OFF: int = 108
+    SCREEN_ON: int = 109
+    SET_BRIGHTNESS: int = 110
+    DISPLAY_BITMAP: int = 197
+    BRIGHTNESS_LEVEL: dict[str, int] = {
         'high': 0,
         'medium': 128,
         'low': 255
     }
-    COM_PORT = [
+    COM_PORT: list[str] = [
         '/dev/ttyACM0'
         'COM3'
     ]
 
     def __init__(self, config: dict):
         if 'com_port' in config:
-            port = config.get('com_port', '/dev/ttyACM0')
+            port: str = config.get('com_port', '/dev/ttyACM0')
         else:
-            port = self.auto_detect_com_port()
-        self.serial = serial.Serial(port, 115200, timeout=1, rtscts=1)
+            port: str = self.auto_detect_com_port()
+        self.serial: serial.Serial = serial.Serial(
+            port, 115200, timeout=1, rtscts=1)
         self.ScreenOn()
         self.SetBrightness(self.BRIGHTNESS_LEVEL.get(
             config.get('screen_brightness', 0), 0))
@@ -39,7 +40,7 @@ class Com:
         """
             Try to auto discover port com
         """
-        ports = serial.tools.list_ports.grep('.', include_links=True)
+        ports: list = serial.tools.list_ports.grep('.', include_links=True)
         for port in ports:
             if port.device in self.COM_PORT:
                 return port.device
@@ -49,7 +50,7 @@ class Com:
         """
             Send command to hardware
         """
-        byteBuffer = bytearray(6)
+        byteBuffer: bytearray = bytearray(6)
         byteBuffer[0] = (x >> 2)
         byteBuffer[1] = (((x & 3) << 6) + (y >> 4))
         byteBuffer[2] = (((y & 15) << 4) + (ex >> 6))

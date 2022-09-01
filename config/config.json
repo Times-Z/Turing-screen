@@ -127,7 +127,7 @@
         }
     ],
     "show_fps": {
-        "show": false,
+        "show": true,
         "text": "FPS : ",
         "x": 265,
         "y": 465,
