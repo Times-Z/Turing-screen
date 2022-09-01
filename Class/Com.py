@@ -2,6 +2,7 @@
 
 import serial
 import serial.tools.list_ports
+import serial.serialutil
 
 
 class Com:
@@ -21,13 +22,13 @@ class Com:
         'low': 255
     }
     COM_PORT: list[str] = [
-        '/dev/ttyACM0'
-        'COM3'
+        '/dev/ttyACM0',  # Linux port default
+        'COM3'  # Windows port default
     ]
 
     def __init__(self, config: dict):
         if 'com_port' in config:
-            port: str = config.get('com_port', '/dev/ttyACM0')
+            port: str = config.get('com_port', self.COM_PORT[0])
         else:
             port: str = self.auto_detect_com_port()
         self.serial: serial.Serial = serial.Serial(
@@ -36,15 +37,13 @@ class Com:
         self.SetBrightness(self.BRIGHTNESS_LEVEL.get(
             config.get('screen_brightness', 0), 0))
 
-    def auto_detect_com_port(self) -> str | None:
+    def auto_detect_com_port(self) -> str:
         """
             Try to auto discover port com
         """
-        ports: list = serial.tools.list_ports.grep('.', include_links=True)
-        for port in ports:
+        for port in serial.tools.list_ports.grep('.*', include_links=True):
             if port.device in self.COM_PORT:
                 return port.device
-            return None
 
     def SendReg(self, cmd: int, x: int, y: int, ex: int, ey: int) -> None:
         """
@@ -57,7 +56,12 @@ class Com:
         byteBuffer[3] = (((ex & 63) << 2) + (ey >> 8))
         byteBuffer[4] = (ey & 255)
         byteBuffer[5] = cmd
-        self.serial.write(bytes(byteBuffer))
+        try:
+            self.serial.write(bytes(byteBuffer))
+        except serial.serialutil.PortNotOpenError:
+            print('Auto discovery of COM port failed')
+            print('Please use config.json to define com_port key as correct value')
+            exit(128)
 
     def Reset(self) -> None:
         """
