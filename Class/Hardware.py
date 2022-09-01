@@ -120,7 +120,11 @@ class Hardware:
         """
             Get CPU die temperature
         """
-        return self.__formatString(psutil.sensors_temperatures()[self.cpu_brand][1 if not junction else 0].current, True, '°C')
+        is_junction_allowed: bool = False
+        temps: list = psutil.sensors_temperatures()[self.cpu_brand]
+        if len(temps) > 1:
+            is_junction_allowed = True
+        return self.__formatString(psutil.sensors_temperatures()[self.cpu_brand][1 if not junction and is_junction_allowed else 0].current, True, '°C')
 
     def cpuGetCurrentLoad(self) -> str:
         """
