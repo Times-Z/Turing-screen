@@ -12,7 +12,8 @@
                 "metric": "cpuGetCurrentLoad",
                 "x": 70,
                 "y": 17,
-                "transparent": true
+                "transparent": true,
+                "font_path": "delugia/Delugia.ttf"
             }
         },
         {
@@ -26,7 +27,7 @@
         {
             "CPU_temp": {
                 "metric": "cpuGetCurrentTemp",
-                "x": 260,
+                "x": 250,
                 "y": 17,
                 "transparent": true
             }
@@ -50,7 +51,7 @@
         {
             "GPU_temp": {
                 "metric": "gpuGetTemp",
-                "x": 260,
+                "x": 250,
                 "y": 67,
                 "transparent": true
             }

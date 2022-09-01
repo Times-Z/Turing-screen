@@ -13,11 +13,23 @@ class Display:
         Display class
     """
 
+    DEFAULT_PARAM: dict = {
+        'text': 'Sample Text',
+        'x': 0,
+        'y': 0,
+        'font_path': 'roboto/Roboto-Regular.ttf',
+        'font_size': 20,
+        'font_color': (255, 255, 255),
+        'background_color': (0, 0, 0),
+        'background_image': None
+    }
+
     def __init__(self, com: Com, ser: serial.Serial, config: dict) -> None:
         self.com: Com = com
         self.serial: serial.Serial = ser
-        self.DISPLAY_WIDTH: int = config.get("display_width", 320)
-        self.DISPLAY_HEIGHT: int = config.get("display_height", 480)
+        self.config: dict = config
+        self.DISPLAY_WIDTH: int = config.get('display_width', 320)
+        self.DISPLAY_HEIGHT: int = config.get('display_height', 480)
 
     def displayPILImage(self, image: Image.Image, x: int, y: int, gif: bool = False) -> None:
         """
@@ -70,12 +82,7 @@ class Display:
         self.displayPILImage(
             image, x, y, True if ".gif" in bitmap_path else False)
 
-    def displayText(self, text: str, x=0, y=0,
-                    font="assets/fonts/roboto/Roboto-Regular.ttf",
-                    font_size=20,
-                    font_color=(255, 255, 255),
-                    background_color=(0, 0, 0),
-                    background_image: str = '') -> None:
+    def displayText(self, text: str, x: int, y: int, font_path: str, font_size: int, font_color: tuple, background_color: tuple, background_image: str | None) -> None:
         """
         Convert text to bitmap using PIL and display it
 
@@ -84,13 +91,14 @@ class Display:
         assert len(text) > 0, 'Text must not be empty'
         assert font_size > 0, "Font size must be > 0"
 
-        if len(background_image) <= 0:
+        if background_image is None:
             text_image: Image.Image = Image.new(
                 'RGB', (self.DISPLAY_WIDTH, self.DISPLAY_HEIGHT), background_color)
         else:
             text_image: Image.Image = Image.open(background_image)
 
-        font: ImageFont.FreeTypeFont = ImageFont.truetype(font, font_size)
+        font: ImageFont.FreeTypeFont = ImageFont.truetype(self.config.get(
+            'assets_dir', 'assets/') + 'fonts/' + font_path, font_size)
         draw: ImageDraw.ImageDraw = ImageDraw.Draw(text_image)
         draw.text((x, y), text, font=font, fill=font_color)
 
