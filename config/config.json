@@ -5,6 +5,7 @@
     "display_width": 320,
     "display_height": 480,
     "hot_reload_config": true,
+    "hot_reload_interval": 30,
     "dynamic_text_informations": [
         {
             "CPU_load": {
@@ -12,6 +13,7 @@
                 "x": 70,
                 "y": 17,
                 "transparent": true,
+                "font_size": 16,
                 "font_path": "delugia/Delugia.ttf"
             }
         },
@@ -20,7 +22,9 @@
                 "metric": "cpuGetCurrentFreq",
                 "x": 143,
                 "y": 17,
-                "transparent": true
+                "transparent": true,
+                "font_size": 16,
+                "font_path": "delugia/Delugia.ttf"
             }
         },
         {
@@ -28,7 +32,9 @@
                 "metric": "cpuGetCurrentTemp",
                 "x": 250,
                 "y": 17,
-                "transparent": true
+                "transparent": true,
+                "font_size": 16,
+                "font_path": "delugia/Delugia.ttf"
             }
         },
         {
@@ -36,7 +42,9 @@
                 "metric": "gpuGetLoad",
                 "x": 70,
                 "y": 67,
-                "transparent": true
+                "transparent": true,
+                "font_size": 16,
+                "font_path": "delugia/Delugia.ttf"
             }
         },
         {
@@ -44,7 +52,9 @@
                 "metric": "gpuGetPower",
                 "x": 143,
                 "y": 67,
-                "transparent": true
+                "transparent": true,
+                "font_size": 16,
+                "font_path": "delugia/Delugia.ttf"
             }
         },
         {
@@ -52,7 +62,9 @@
                 "metric": "gpuGetTemp",
                 "x": 250,
                 "y": 67,
-                "transparent": true
+                "transparent": true,
+                "font_size": 16,
+                "font_path": "delugia/Delugia.ttf"
             }
         },
         {
@@ -60,7 +72,9 @@
                 "metric": "ramGetPercent",
                 "x": 70,
                 "y": 117,
-                "transparent": true
+                "transparent": true,
+                "font_size": 16,
+                "font_path": "delugia/Delugia.ttf"
             }
         },
         {
@@ -68,7 +82,9 @@
                 "metric": "ramGetUsed",
                 "x": 143,
                 "y": 117,
-                "transparent": true
+                "transparent": true,
+                "font_size": 16,
+                "font_path": "delugia/Delugia.ttf"
             }
         },
         {
@@ -79,7 +95,8 @@
                 "x": 70,
                 "y": 157,
                 "transparent": true,
-                "font_size": 14
+                "font_size": 12,
+                "font_path": "delugia/Delugia.ttf"
             }
         },
         {
@@ -90,7 +107,8 @@
                 "x": 143,
                 "y": 157,
                 "transparent": true,
-                "font_size": 14
+                "font_size": 12,
+                "font_path": "delugia/Delugia.ttf"
             }
         },
         {
@@ -101,7 +119,8 @@
                 "x": 70,
                 "y": 177,
                 "transparent": true,
-                "font_size": 14
+                "font_size": 12,
+                "font_path": "delugia/Delugia.ttf"
             }
         },
         {
@@ -112,7 +131,8 @@
                 "x": 70,
                 "y": 197,
                 "transparent": true,
-                "font_size": 14
+                "font_size": 12,
+                "font_path": "delugia/Delugia.ttf"
             }
         }
     ],

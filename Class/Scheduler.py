@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 
-from ast import arguments
 import threading
-from time import time
+from time import sleep, time
 
 from Class.Com import Com
 from Class.Config import Config
@@ -35,20 +34,31 @@ class Scheduler:
         """
         static: str = params.get('static', '')
         dynamic: str = params.get('dynamic', '')
-        self.generateTextInformation(static, False)
+        self.__generateTextInformation(static, False)
         while not self.STOPPING:
             start_time = time()
-            self.generateTextInformation(dynamic)
-
-            self.displayFps(start_time)
-            self.runThreads()
+            print('Running thread count : ' +
+                  str(threading.activeCount()), end='\r', flush=True)
+            self.__generateTextInformation(dynamic)
+            self.__displayFps(start_time)
+            self.__runThreads(self.threads)
             if self.config.get('hot_reload_config', False):
-                self.config = Config().load()
+                update_running: bool = self.__isThreadRunning(
+                    'update-config-thread')
+                if not update_running:
+                    self.__runThreads([
+                        threading.Thread(
+                            name='update-config-thread',
+                            target=self.__updateConfiguration,
+                            args=[self.config.get('hot_reload_interval', 60)]
+                        )
+                    ], False)
 
-    def generateTextInformation(self, target: str, dynamic: bool = True) -> threading.Thread:
+    def __generateTextInformation(self, target: str, dynamic: bool = True) -> threading.Thread:
         """
             Generate text information
         """
+        named_item: dict
         for named_item in self.config.get(target, []):
             element: dict = next(iter(named_item.values()))
             param: str = element['param'] if 'param' in element else None
@@ -71,25 +81,26 @@ class Scheduler:
 
             if dynamic:
                 self.threads.append(threading.Thread(
-                    target=self.display.displayText, kwargs=arguments))
+                    name=list(named_item.keys())[0], target=self.display.displayText, kwargs=arguments))
             else:
                 self.display.displayText(**arguments)
 
-    def runThreads(self) -> None:
+    def __runThreads(self, threads: list[threading.Thread], wait_thread: bool = True) -> None:
         """
             Run threads and wait for thread job end
         """
         thread: threading.Thread
-        for thread in self.threads:
+        for thread in threads:
             if not self.com.serial.isOpen():
                 self.com.serial.open()
             thread.start()
-            thread.join()
+            if wait_thread:
+                thread.join()
             if self.com.serial.isOpen():
                 self.com.serial.close()
-        self.threads.clear()
+        threads.clear()
 
-    def displayFps(self, start_time: float) -> None:
+    def __displayFps(self, start_time: float) -> None:
         """
             Display FPS if configured
         """
@@ -109,4 +120,20 @@ class Scheduler:
                 )
                 self.threads.append(threading.Thread(
                     target=self.display.displayText, kwargs=arguments))
-                print("Total frame/s: " + fps, end="\r", flush=True)
+
+    def __isThreadRunning(self, thread_name: str) -> bool:
+        for thread in threading.enumerate():
+            if thread_name in thread.name:
+                return True
+        return False
+
+    def __updateConfiguration(self, update_time: int = 60):
+        self.config = Config().load()
+        self.threads.append(
+            threading.Thread(
+                target=self.com.SetBrightness,
+                args=[self.com.BRIGHTNESS_LEVEL.get(
+                    self.config.get('screen_brightness', 0), 0)]
+            )
+        )
+        sleep(update_time)

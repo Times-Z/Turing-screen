@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
-from Class import Com, Config, Display, Hardware, Signal
-from Class.Scheduler import Scheduler
+from Class import Com, Config, Display, Hardware, Scheduler, Signal
 
 if __name__ == "__main__":
     config = Config().load()
@@ -22,10 +21,10 @@ if __name__ == "__main__":
         'dynamic': 'dynamic_text_informations'
     })
 
-        # for picture in sorted(os.listdir(config.get('assets_dir', 'assets/') + 'imgs/surf')):
-        #     threads.append(generateThread(
-        #         display.displayBitmap, {
-        #             "bitmap_path": config.get('assets_dir', 'assets/') + 'imgs/surf/' + picture,
-        #             "x": 100,
-        #             "y": 300,
-        #         }))
+    # for picture in sorted(os.listdir(config.get('assets_dir', 'assets/') + 'imgs/surf')):
+    #     threads.append(generateThread(
+    #         display.displayBitmap, {
+    #             "bitmap_path": config.get('assets_dir', 'assets/') + 'imgs/surf/' + picture,
+    #             "x": 100,
+    #             "y": 300,
+    #         }))
