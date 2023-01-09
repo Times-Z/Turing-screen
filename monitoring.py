@@ -1,24 +1,22 @@
 #!/usr/bin/env python3
 
-from Class import Com, Config, Display, Hardware, Scheduler, Signal
+from Class import Com, Config, Display, Scheduler, Signal
 
 if __name__ == "__main__":
-    config = Config().load()
-    theme = Config().getTheme()
+    configuration: Config = Config()
+    config: dict = configuration.load()
+    theme = configuration.getTheme()
 
-    com = Com(config)
-    signal = Signal(com)
+    com: Com = Com(config)
+    signal: Signal = Signal(com)
     signal.makeHandler(signal.sigHandler)
-    display = Display(com, com.serial, config)
-    hardware = Hardware()
-    scheduler = Scheduler(config, theme, display, com)
+    display: Display = Display(com, com.serial, config)
+    scheduler: Scheduler = Scheduler(configuration, theme, display, com)
 
-    display.displayBitmap(theme)
-    display.displayBitmap(config.get(
-        'assets_dir', 'assets/') + 'imgs/docker.png', 120, 300)
     scheduler.run({
-        'static': 'static_text_informations',
-        'dynamic': 'dynamic_text_informations'
+        'txt_static': 'static_text_informations',
+        'txt_dynamic': 'dynamic_text_informations',
+        'img_static': 'static_image'
     })
 
     # for picture in sorted(os.listdir(config.get('assets_dir', 'assets/') + 'imgs/surf')):

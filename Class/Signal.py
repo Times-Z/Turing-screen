@@ -7,7 +7,8 @@ from time import sleep
 from tracemalloc import Frame
 from typing import Callable
 
-from Class.Com import Com
+from .Com import Com
+from .Logger import logger
 
 
 class Signal:
@@ -31,6 +32,7 @@ class Signal:
         """
             Used to stop application with signal after send a full frame to device
         """
+        logger.info('Signal ' + str(signum) + ' detected')
         if not self.com.serial.isOpen():
             self.com.serial.open()
         sleep(0.1)
