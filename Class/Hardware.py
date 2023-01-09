@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 
+import os
+
 import psutil
 from psutil._common import bytes2human
 
-from Class.Nvidia import Nvidia
-from Class.Radeon import Radeon
+from .Logger import logger
+from .Nvidia import Nvidia
+from .Radeon import Radeon
 
 
 class Hardware:
@@ -30,15 +33,23 @@ class Hardware:
         else:
             self.gpu: None = None
 
+    @staticmethod
+    def getCurrentProgramMemoryUsage() -> str:
+        process = psutil.Process(os.getpid())
+        return bytes2human(process.memory_info().rss)
+
     def __getCpuBrand(self) -> str:
         """
             Get CPU brand based on sensor temparature
         """
         if 'coretemp' in psutil.sensors_temperatures():
+            logger.info('intel cpu detected')
             return 'coretemp'
         elif 'k10temp' in psutil.sensors_temperatures():
+            logger.info('amd cpu detected')
             return 'k10temp'
         else:
+            logger.info('unknow cpu detected')
             return 'unknow'
 
     def __getGpuBrand(self) -> str:
@@ -46,10 +57,13 @@ class Hardware:
             Get GPU brand name
         """
         if Nvidia.isAvailable():
+            logger.info('nvidia gpu detected')
             return 'nvidia'
         elif Radeon.isAvailable():
+            logger.info('amd gpu detected')
             return 'amd'
         else:
+            logger.info('unknow gpu detected')
             return 'unknow'
 
     def __formatString(self, value: float | int, rounded: bool = False, endString: str = '') -> str:
@@ -124,7 +138,7 @@ class Hardware:
         temps: list = psutil.sensors_temperatures()[self.cpu_brand]
         if len(temps) > 1:
             is_junction_allowed = True
-        return self.__formatString(psutil.sensors_temperatures()[self.cpu_brand][1 if not junction and is_junction_allowed else 0].current, True, '°C')
+        return self.__formatString(temps[1 if not junction and is_junction_allowed else 0].current, True, '°C')
 
     def cpuGetCurrentLoad(self) -> str:
         """

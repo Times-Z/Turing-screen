@@ -4,6 +4,8 @@ import math
 
 import pyamdgpuinfo
 
+from .Logger import logger
+
 
 class Radeon:
 
@@ -24,6 +26,7 @@ class Radeon:
         try:
             return (self.gpu.query_load()) * 100
         except:
+            logger.warn("gpuLoad isn't available on this device")
             return math.nan
 
     def gpuPower(self):
@@ -33,6 +36,7 @@ class Radeon:
         try:
             return self.gpu.query_power()
         except:
+            logger.warn("gpuPower isn't available on this device")
             return math.nan
 
     def gpuTemp(self) -> float:
@@ -42,4 +46,5 @@ class Radeon:
         try:
             return self.gpu.query_temperature()
         except:
+            logger.warn("gpuTemp isn't available on this device")
             return math.nan

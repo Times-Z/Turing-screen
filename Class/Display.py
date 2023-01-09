@@ -6,6 +6,7 @@ import serial
 from PIL import Image, ImageDraw, ImageFont, PyAccess
 
 from .Com import Com
+from .Logger import logger
 
 
 class Display:
@@ -13,7 +14,7 @@ class Display:
         Display class
     """
 
-    DEFAULT_PARAM: dict = {
+    DEFAULT_TEXT_PARAM: dict = {
         'text': 'Sample Text',
         'x': 0,
         'y': 0,
@@ -22,6 +23,12 @@ class Display:
         'font_color': (255, 255, 255),
         'background_color': (0, 0, 0),
         'background_image': None
+    }
+
+    DEFAULT_BITMAP_PARAM: dict = {
+        'bitmap_path': 'default.png',
+        'x': 0,
+        'y': 0
     }
 
     def __init__(self, com: Com, ser: serial.Serial, config: dict) -> None:
@@ -74,13 +81,14 @@ class Display:
             except EOFError:
                 pass  # end of sequence gif
 
-    def displayBitmap(self, bitmap_path: str, x=0, y=0) -> None:
+    def displayBitmap(self, bitmap_path: str, x: int, y: int) -> None:
         """
             Display bitmap on 0/0 by default
         """
         image: Image.Image = Image.open(bitmap_path)
         self.displayPILImage(
             image, x, y, True if ".gif" in bitmap_path else False)
+        logger.info('Display bitmap ' + bitmap_path + ' on x ' + str(x) + ' y ' + str(y))
 
     def displayText(self, text: str, x: int, y: int, font_path: str, font_size: int, font_color: tuple, background_color: tuple, background_image: str | None) -> None:
         """
